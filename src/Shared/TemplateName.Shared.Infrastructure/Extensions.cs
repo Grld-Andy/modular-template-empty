@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
 using TemplateName.Shared.Abstractions;
 using TemplateName.Shared.Abstractions.Dispatchers;
 using TemplateName.Shared.Abstractions.Modules;
@@ -33,6 +32,7 @@ using TemplateName.Shared.Infrastructure.Serialization;
 using TemplateName.Shared.Infrastructure.Services;
 using TemplateName.Shared.Infrastructure.Storage;
 using TemplateName.Shared.Infrastructure.Time;
+using TemplateName.Shared.Infrastructure.Swagger;
 
 namespace TemplateName.Shared.Infrastructure;
 
@@ -69,16 +69,7 @@ public static class Extensions
 
         services.AddCorsPolicy(configuration);
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(swagger =>
-        {
-            swagger.EnableAnnotations();
-            swagger.CustomSchemaIds(x => x.FullName);
-            swagger.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "TemplateName API",
-                Version = "v1"
-            });
-        });
+        services.AddSwagger();
         
         services.AddMemoryCache();
         services.AddHttpClient();
@@ -135,13 +126,14 @@ public static class Extensions
         app.UseCorrelationId();
         app.UseErrorHandling();
         app.UseSwagger();
+        app.UseSwaggerUI();
         app.UseReDoc(reDoc =>
         {
             reDoc.RoutePrefix = "docs";
             reDoc.SpecUrl("/swagger/v1/swagger.json");
             reDoc.DocumentTitle = "TemplateName API";
         });
-        app.UseAuthentication();
+        app.UseAuth();
         app.UseContext();
         app.UseLogging();
         app.UseRouting();
@@ -185,4 +177,6 @@ public static class Extensions
     public static Guid? TryGetCorrelationId(this HttpContext context)
         => context.Items.TryGetValue(CorrelationIdKey, out var id) ? (Guid) id : null;
 }
+
+
 
