@@ -22,13 +22,14 @@ foreach (var module in modules)
 
 var app = builder.Build();
 
-app.MapControllers();
+
 app.UseModularInfrastructure();
 
 foreach (var module in modules)
 {
     module.Use(app);
 }
+app.MapControllers();
 
 app.MapGet("/", (AppInfo appInfo) => appInfo).WithTags("API").WithName("Info");
 
